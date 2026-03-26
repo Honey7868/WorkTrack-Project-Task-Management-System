@@ -1,0 +1,17 @@
+# Environments
+venv/
+env/
+.env
+__pycache__/
+*.pyc
+
+# Database
+db.sqlite3
+
+# Uploaded Media
+media/
+
+# IDEs
+.vscode/
+.idea/
+.DS_Store

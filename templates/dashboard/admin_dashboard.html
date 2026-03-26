@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard | WorkTrack{% endblock %}
+{% block header_title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Stats Row -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Stat Card 1 -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-center hover:shadow-md transition">
+            <div class="p-3 rounded-full bg-blue-100 text-blue-600 mr-4">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+            </div>
+            <div>
+                <p class="text-sm font-medium text-gray-500">Total Projects</p>
+                <p class="text-2xl font-bold text-gray-900">{{ total_projects }}</p>
+            </div>
+        </div>
+        
+        <!-- Stat Card 2 -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-center hover:shadow-md transition">
+            <div class="p-3 rounded-full bg-green-100 text-green-600 mr-4">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+            <div>
+                <p class="text-sm font-medium text-gray-500">Active Tasks</p>
+                <p class="text-2xl font-bold text-gray-900">{{ active_tasks }}</p>
+            </div>
+        </div>
+        
+        <!-- Stat Card 3 -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-center hover:shadow-md transition">
+            <div class="p-3 rounded-full bg-purple-100 text-purple-600 mr-4">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+            </div>
+            <div>
+                <p class="text-sm font-medium text-gray-500">Total Employees</p>
+                <p class="text-2xl font-bold text-gray-900">{{ total_employees }}</p>
+            </div>
+        </div>
+        
+        <!-- Stat Card 4 -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-center hover:shadow-md transition">
+            <div class="p-3 rounded-full bg-orange-100 text-orange-600 mr-4">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+            <div>
+                <p class="text-sm font-medium text-gray-500">Approaching Deadlines</p>
+                <p class="text-2xl font-bold text-gray-900">{{ approaching_deadlines }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts and Tables Area -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Teams / Groups Area -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 lg:col-span-2">
+            <div class="flex justify-between items-center mb-4 border-b border-gray-100 pb-2">
+                <h3 class="text-lg font-bold text-gray-800">Company Teams</h3>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                {% for team in teams %}
+                <div class="bg-gray-50 rounded-lg border border-gray-200 p-4 hover:shadow-sm transition">
+                    <div class="flex justify-between items-center mb-3">
+                        <h4 class="font-bold text-blue-900 border-b-2 border-blue-400 pb-0.5">{{ team.name }}</h4>
+                        <a href="{% url 'admin:auth_group_change' team.id %}" class="text-xs text-blue-600 hover:underline font-bold">Manage &rarr;</a>
+                    </div>
+                    <div class="flex -space-x-2 overflow-hidden mb-3">
+                        {% for member in team.user_set.all|slice:":5" %}
+                        <div class="inline-block h-8 w-8 rounded-full ring-2 ring-white bg-indigo-100 flex items-center justify-center text-xs font-bold text-indigo-700" title="{{ member.username }}">
+                            {{ member.username|make_list|first|upper }}
+                        </div>
+                        {% empty %}
+                        <span class="text-xs text-gray-400">No members assigned to this team.</span>
+                        {% endfor %}
+                        {% if team.user_set.count > 5 %}
+                        <div class="inline-block h-8 w-8 rounded-full ring-2 ring-white bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-600">
+                            +{{ team.user_set.count|add:"-5" }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <p class="text-xs text-gray-500 font-semibold">{{ team.user_set.count }} Members in team</p>
+                </div>
+                {% empty %}
+                <div class="col-span-full py-8 text-center bg-white border border-gray-100 rounded-lg">
+                    <svg class="w-10 h-10 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                    <p class="text-sm font-medium text-gray-500">No teams formed yet.</p>
+                    <p class="text-xs text-gray-400 mt-1">Navigate to the Database Admin to begin securely forming team groupings.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Recent Activity column -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">Recent Activity</h3>
+            <div class="space-y-4">
+                <p class="text-sm text-gray-500">No recent activity.</p>
+                <!-- Activities will be listed here -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

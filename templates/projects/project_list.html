@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}Projects | WorkTrack{% endblock %}
+{% block header_title %}Projects Overview{% endblock %}
+
+{% block content %}
+<div class="mb-6 flex justify-between items-center">
+    <div>
+        <h2 class="text-2xl font-bold text-gray-800">Projects</h2>
+        <p class="text-gray-500 text-sm mt-1">Manage and monitor all active projects across the organization.</p>
+    </div>
+    {% if user.role == 'ADMIN' %}
+    <a href="{% url 'admin:core_project_add' %}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm flex items-center transition">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+        New Project
+    </a>
+    {% endif %}
+</div>
+
+<!-- Projects Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="projects-container">
+    {% for project in projects %}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition flex flex-col justify-between">
+        <div>
+            <div class="flex justify-between items-start mb-4">
+                <h3 class="font-bold text-lg text-gray-800">{{ project.title }}</h3>
+                <span class="px-2.5 py-1 text-xs font-semibold bg-green-100 text-green-800 rounded-full">Active</span>
+            </div>
+            <p class="text-gray-500 text-sm mb-6 line-clamp-2">{{ project.description|default:"No description provided." }}</p>
+            
+            <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                <div class="flex items-center">
+                    <svg class="w-4 h-4 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    Due {{ project.end_date|date:"M d, Y" }}
+                </div>
+            </div>
+        </div>
+        
+        <div>
+            <div class="flex justify-between items-center border-t border-gray-100 pt-4 mt-2">
+                <span class="text-xs text-gray-400">Created by {{ project.created_by.username }}</span>
+                <a href="{% url 'project_detail' project.id %}" class="text-sm font-medium text-blue-600 hover:text-blue-800">View Detail &rarr;</a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-span-full py-10 text-center text-gray-500 bg-white rounded-xl border border-gray-100 shadow-sm">
+        No projects found.
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

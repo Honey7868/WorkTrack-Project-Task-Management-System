@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% block title %}Kanban Board | WorkTrack{% endblock %}
+{% block header_title %}Tasks Board{% endblock %}
+
+{% block content %}
+<div class="mb-4 flex flex-col md:flex-row md:items-center justify-between">
+    <div>
+        <h2 class="text-2xl font-bold text-gray-800">Kanban Board</h2>
+        <p class="text-gray-500 text-sm mt-1">Status of tasks.</p>
+    </div>
+    
+    <div class="mt-4 md:mt-0 flex space-x-3">
+        {% if user.role == 'ADMIN' %}
+        <a href="{% url 'admin:core_task_add' %}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm flex items-center transition">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            Add Task
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Board Container -->
+<div class="flex pb-8 overflow-x-auto h-[calc(100vh-200px)] space-x-6 items-start">
+    
+    <!-- Column: Not Started -->
+    <div class="flex-shrink-0 w-80 bg-gray-100 rounded-xl flex flex-col max-h-full" ondrop="drop(event, 'NOT_STARTED')" ondragover="allowDrop(event)">
+        <div class="p-4 flex items-center justify-between border-b border-gray-200">
+            <h3 class="font-bold text-gray-700 flex items-center">
+                <span class="w-2.5 h-2.5 rounded-full bg-gray-400 mr-2"></span>
+                To Do
+                <span class="ml-2 bg-gray-200 text-gray-600 text-xs py-0.5 px-2 rounded-full font-semibold">{{ todo_tasks|length }}</span>
+            </h3>
+        </div>
+        
+        <div class="p-3 flex-1 overflow-y-auto space-y-3">
+            {% for task in todo_tasks %}
+            <!-- Task Card -->
+            <div id="task-{{ task.id }}" draggable="true" ondragstart="drag(event)" class="bg-white p-4 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition group cursor-grab active:cursor-grabbing">
+                <div class="flex justify-between items-start mb-2">
+                    <span class="px-2 py-1 text-xs font-semibold bg-gray-100 text-gray-700 rounded-md">{{ task.get_priority_display }}</span>
+                </div>
+                <h4 class="font-bold text-gray-800 mb-1 text-sm">{{ task.title }}</h4>
+                <p class="text-xs text-gray-500 mb-3 line-clamp-2">{{ task.description|default:"No description" }}</p>
+                <div class="flex items-center justify-between text-xs text-gray-500">
+                    <div class="flex items-center font-medium">
+                        <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        {{ task.deadline|date:"M d" }}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Column: In Progress -->
+    <div class="flex-shrink-0 w-80 bg-blue-50/50 rounded-xl flex flex-col max-h-full border border-blue-100" ondrop="drop(event, 'IN_PROGRESS')" ondragover="allowDrop(event)">
+        <div class="p-4 flex items-center justify-between border-b border-blue-100">
+            <h3 class="font-bold text-blue-800 flex items-center">
+                <span class="w-2.5 h-2.5 rounded-full bg-blue-500 mr-2"></span>
+                In Progress
+                <span class="ml-2 bg-blue-100 text-blue-800 text-xs py-0.5 px-2 rounded-full font-semibold">{{ in_progress_tasks|length }}</span>
+            </h3>
+        </div>
+        
+        <div class="p-3 flex-1 overflow-y-auto space-y-3">
+            {% for task in in_progress_tasks %}
+            <div id="task-{{ task.id }}" draggable="true" ondragstart="drag(event)" class="bg-white p-4 rounded-lg shadow-sm border border-gray-100 border-l-4 border-l-blue-500 hover:shadow-md transition cursor-grab active:cursor-grabbing">
+                <div class="flex justify-between items-start mb-2">
+                    <span class="px-2 py-1 text-xs font-semibold bg-gray-100 text-gray-700 rounded-md">{{ task.get_priority_display }}</span>
+                </div>
+                <h4 class="font-bold text-gray-800 mb-1 text-sm">{{ task.title }}</h4>
+                <div class="flex items-center justify-between text-xs text-gray-500 mt-3">
+                    <div class="flex items-center">
+                        <svg class="w-3.5 h-3.5 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        {{ task.deadline|date:"M d" }}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Column: Completed -->
+    <div class="flex-shrink-0 w-80 bg-green-50/50 rounded-xl flex flex-col max-h-full border border-green-100" ondrop="drop(event, 'COMPLETED')" ondragover="allowDrop(event)">
+        <div class="p-4 flex items-center justify-between border-b border-green-100">
+            <h3 class="font-bold text-green-800 flex items-center">
+                <span class="w-2.5 h-2.5 rounded-full bg-green-500 mr-2"></span>
+                Completed
+                <span class="ml-2 bg-green-100 text-green-800 text-xs py-0.5 px-2 rounded-full font-semibold">{{ completed_tasks|length }}</span>
+            </h3>
+        </div>
+        
+        <div class="p-3 flex-1 overflow-y-auto space-y-3">
+            {% for task in completed_tasks %}
+            <div id="task-{{ task.id }}" draggable="true" ondragstart="drag(event)" class="bg-white p-4 rounded-lg shadow-sm border border-gray-100 border-l-4 border-l-green-500 hover:shadow-md transition opacity-75 cursor-grab active:cursor-grabbing">
+                <a href="{% url 'task_detail' task.id %}" class="hover:underline"><h4 class="font-bold text-gray-800 text-sm line-through">{{ task.title }}</h4></a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<div style="display:none">{% csrf_token %}</div>
+<script>
+    function allowDrop(ev) {
+        ev.preventDefault();
+    }
+
+    function drag(ev) {
+        ev.dataTransfer.setData("taskId", ev.target.id.replace('task-', ''));
+    }
+
+    function drop(ev, status) {
+        ev.preventDefault();
+        var taskId = ev.dataTransfer.getData("taskId");
+        var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        
+        fetch(`/api/tasks/${taskId}/`, {
+            method: 'PATCH',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({ status: status })
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                alert('You do not have permission to move this task.');
+            }
+        });
+    }
+</script>
+{% endblock %}
